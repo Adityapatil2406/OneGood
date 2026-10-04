@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OneGood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2ee;--ink:#14302a;--mute:#5d746c;--leaf:#2f8f57;--sun:#f4b73a;--card:#fff;--line:#d5e0d9;--danger:#cf3b3b}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1d19;--ink:#e6f1ea;--mute:#8fa89d;--card:#162823;--line:#26403a;--danger:#e85454}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 "Bricolage Grotesque",system-ui,sans-serif}
+main{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:clamp(3rem,10vw,5.5rem);font-weight:800;letter-spacing:-.04em;line-height:.9;margin:0}
+h1 span{color:var(--leaf)}
+h2{font-size:1.25rem;font-weight:600;margin:48px 0 14px}
+.sub{color:var(--mute);margin:12px 0 28px;max-width:46ch}
+.log-wrap{margin-bottom:28px}
+.date-indicator{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--sun);padding:10px 16px;border-radius:12px;margin-bottom:12px;font-size:.95rem}
+.date-indicator strong{color:var(--leaf)}
+.pill-btn{background:transparent;border:1px solid var(--mute);color:var(--ink);padding:4px 12px;border-radius:20px;font:inherit;font-size:.85rem;cursor:pointer}
+.pill-btn:hover{background:var(--line)}
+.log{display:flex;gap:10px;flex-wrap:wrap}
+.log input{flex:1;min-width:220px;padding:16px 18px;font:inherit;border:2px solid var(--ink);border-radius:14px;background:var(--card);color:var(--ink)}
+button{padding:16px 26px;font:600 1rem inherit;font-family:inherit;border:0;border-radius:14px;background:var(--sun);color:#14302a;cursor:pointer;transition:transform .1s,opacity .15s}
+button:hover{opacity:.92}
+button:active{transform:scale(.98)}
+button.del-btn{background:var(--danger);color:#fff;padding:16px 20px}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
+.done{background:var(--card);border-left:6px solid var(--leaf);padding:14px 18px;border-radius:10px;margin-bottom:14px}
+.stats{display:flex;gap:36px;margin-top:34px;flex-wrap:wrap}
+.stats b{display:block;font-size:2.4rem;font-weight:800;line-height:1}
+.stats small{color:var(--mute)}
+
+.surprise-section{margin-top:24px}
+.surprise-btn{background:var(--card);border:2px dashed var(--leaf);color:var(--leaf);font-weight:600;padding:12px 20px;border-radius:14px;width:100%;max-width:340px;text-align:center}
+.surprise-btn:hover{background:var(--line)}
+.memory-card{background:var(--card);border:2px solid var(--sun);border-radius:18px;padding:20px 24px;margin-top:14px;animation:fadeDown .3s ease-out}
+.memory-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.memory-tag{background:var(--sun);color:#14302a;padding:3px 10px;border-radius:8px;font-size:.8rem;font-weight:700}
+.memory-card time{color:var(--mute);font-size:.9rem}
+.memory-text{font-size:1.25rem;font-weight:600;margin:0 0 14px}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.scroll{overflow-x:auto;padding-bottom:6px}
+.grid{display:grid;grid-template-rows:repeat(7,14px);grid-auto-flow:column;grid-auto-columns:14px;gap:4px;width:max-content}
+.grid i{border-radius:50%;background:var(--line);transition:transform .15s}
+.grid i.on{background:var(--leaf)}
+.grid i.fut{background:transparent;border:1px dashed var(--line)}
+.grid i:not(.fut){cursor:pointer}
+.grid i:not(.fut):hover{transform:scale(1.5);outline:2px solid var(--sun)}
+.grid i.selected{outline:2px solid var(--ink);transform:scale(1.55)}
+.years a{color:var(--mute);margin-right:14px;text-decoration:none}
+.years a.cur{color:var(--ink);font-weight:600;border-bottom:2px solid var(--sun)}
+.months{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:10px;align-items:end;height:150px}
+.months div{display:flex;flex-direction:column;justify-content:flex-end;height:100%;text-align:center;font-size:.8rem;color:var(--mute)}
+.months span{display:block;background:var(--leaf);border-radius:8px 8px 3px 3px;min-height:3px;margin-bottom:6px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:0;list-style:none}
+.badges li{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--line);opacity:.45}
+.badges li.got{opacity:1;border-color:var(--sun);border-width:2px;cursor:pointer;transition:transform .15s}
+.badges li.got:hover{transform:translateY(-2px)}
+.badges strong{display:block}.badges small{color:var(--mute)}
+.sum{background:var(--ink);color:var(--bg);border-radius:22px;padding:26px 28px;font-size:1.15rem}
+.sum em{font-style:normal;color:var(--sun);font-weight:600}
+.recent{list-style:none;padding:0}.recent li{padding:10px 0;border-bottom:1px solid var(--line)}
+.recent time{color:var(--mute);margin-right:12px;font-size:.9rem}
+@media(prefers-reduced-motion:no-preference){.grid i.on{animation:pop .5s backwards}@keyframes pop{from{transform:scale(0)}}}
+</style>
+</head>
+<body><main>
+<h1>One<span>Good</span></h1>
+<p class="sub">One good thing a day. Small is fine. It all adds up.</p>
+
+<div class="log-wrap" id="logSection">
+  {% if today_note %}
+  <div class="done" id="todayDoneCard">
+    Today's good thing{% if today_time %} <small style="color:var(--mute);font-weight:400">({{ today_time }})</small>{% endif %}: {{ today_note }}
+  </div>
+  {% endif %}
+
+  <div id="dateIndicator" class="date-indicator" style="display:none;">
+    <span>📅 Date: <strong id="indicatorText"></strong></span>
+    <button type="button" id="resetTodayBtn" class="pill-btn">Back to Today</button>
+  </div>
+
+  <form class="log" id="logForm" method="post" action="{{ url_for('add') }}">
+    <input type="hidden" name="entry_date" id="entryDateInput" value="{{ today.isoformat() }}">
+    <input name="note" id="noteInput" maxlength="280" required aria-label="Good thing entry" placeholder="{{ 'Change today\'s entry' if today_note else 'What good thing did you do today?' }}">
+    <button id="submitBtn">{{ 'Update today' if today_note else 'Save today' }}</button>
+    <button type="button" id="deleteBtn" class="del-btn" style="display:none;" title="Delete this entry">Delete</button>
+  </form>
+</div>
+
+<div class="stats">
+  <div><b>{{ current }}</b><small>day streak</small></div>
+  <div><b>{{ longest }}</b><small>longest streak</small></div>
+  <div><b>{{ total }}</b><small>good things so far</small></div>
+</div>
+
+<div class="surprise-section">
+  <button type="button" id="surpriseBtn" class="surprise-btn">✨ Surprise Me with a Past Memory</button>
+  <div id="memoryBox" class="memory-card" style="display:none;">
+    <div class="memory-meta">
+      <span class="memory-tag">🌟 Memory Flashback</span>
+      <time id="memoryDate"></time>
+    </div>
+    <p id="memoryText" class="memory-text"></p>
+    <button type="button" id="anotherMemoryBtn" class="pill-btn">Show Another 🎲</button>
+  </div>
+</div>
+
+<h2>{{ year }} at a glance <small style="font-weight:400;font-size:.85rem;color:var(--mute)">(Click any dot to view or edit)</small></h2>
+<p class="years">{% for y in years %}<a href="?year={{ y }}" class="{{ 'cur' if y == year }}">{{ y }}</a>{% endfor %}</p>
+<div class="scroll"><div class="grid" id="habitGrid">
+  {% for c in grid %}<i class="{{ 'on' if c.note else ('fut' if c.future) }}"
+    data-date="{{ c.d.isoformat() }}"
+    data-display="{{ c.d.strftime('%A, %d %b %Y') }}"
+    data-time="{{ c.time or '' }}"
+    data-note="{{ c.note or '' }}"
+    data-future="{{ '1' if c.future else '0' }}"
+    title="{{ c.d.strftime('%d %b') }}{% if c.time %} ({{ c.time }}){% endif %}{{ ': ' ~ c.note if c.note }}"
+    {% if loop.first %}style="grid-row-start:{{ offset + 1 }}"{% endif %}></i>{% endfor %}
+</div></div>
+
+<h2>Month by month</h2>
+<div class="months">
+  {% for m in months %}<div title="{{ m.count }} of {{ m.days }} days"><span style="height:{{ m.pct }}%"></span>{{ m.name }}<br>{{ m.count }}</div>{% endfor %}
+</div>
+
+<h2>Badges <small style="font-weight:400;font-size:.85rem;color:var(--mute)">(Click unlocked badges to celebrate!)</small></h2>
+<ul class="badges">
+  {% for b in badges %}<li class="{{ 'got' if b.got }}"><strong>{{ '🌟 ' if b.got else '🔒 ' }}{{ b.name }}</strong><small>{{ b.hint }}</small></li>{% endfor %}
+</ul>
+
+<h2>{{ year }} summary</h2>
+{% if summary %}
+<div class="sum">
+  You logged <em>{{ summary.total }}</em> good things across <em>{{ summary.active_months }}</em> months.
+  Your best month was <em>{{ summary.best_month }}</em> with {{ summary.best_count }}.
+  Your longest run was <em>{{ summary.longest }} days</em>, and you do your best work on <em>{{ summary.weekday }}s</em>.
+  {{ summary.first.strftime('%d %b') }} to {{ summary.last.strftime('%d %b') }}.
+</div>
+{% else %}<p class="sub">Nothing logged in {{ year }} yet. Add today's good thing to start the summary.</p>{% endif %}
+
+<h2>Recent</h2>
+<ul class="recent">
+  {% for d, n, t in recent %}<li><time>{{ d.strftime('%d %b') }}{% if t %} • {{ t.strftime('%I:%M %p') }}{% endif %}</time>{{ n }}</li>
+  {% else %}<li class="sub">No entries yet.</li>{% endfor %}
+</ul>
+</main>
+
+<form id="deleteForm" method="post" action="{{ url_for('delete') }}" style="display:none;">
+  <input type="hidden" name="entry_date" id="deleteDateInput">
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+(() => {
+  const TODAY = "{{ today.isoformat() }}";
+  const TODAY_NOTE = {{ (today_note or "")|tojson }};
+  const TODAY_TIME = {{ (today_time or "")|tojson }};
+  
+  const entryDateInput = document.getElementById("entryDateInput");
+  const noteInput = document.getElementById("noteInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
+  const dateIndicator = document.getElementById("dateIndicator");
+  const indicatorText = document.getElementById("indicatorText");
+  const resetTodayBtn = document.getElementById("resetTodayBtn");
+  const habitGrid = document.getElementById("habitGrid");
+  const logSection = document.getElementById("logSection");
+  const deleteForm = document.getElementById("deleteForm");
+  const deleteDateInput = document.getElementById("deleteDateInput");
+
+  let selectedDot = null;
+
+  function selectDate(dateIso, displayStr, noteVal, isFuture, timeVal) {
+    if (isFuture) return;
+
+    if (selectedDot) selectedDot.classList.remove("selected");
+    const targetDot = habitGrid.querySelector(`i[data-date="${dateIso}"]`);
+    if (targetDot) {
+      targetDot.classList.add("selected");
+      selectedDot = targetDot;
+    }
+
+    entryDateInput.value = dateIso;
+    noteInput.value = noteVal || "";
+
+    const isToday = dateIso === TODAY;
+
+    if (isToday) {
+      dateIndicator.style.display = "none";
+      submitBtn.textContent = noteVal ? "Update today" : "Save today";
+      noteInput.placeholder = noteVal ? "Change today's entry" : "What good thing did you do today?";
+      deleteBtn.style.display = noteVal ? "inline-block" : "none";
+    } else {
+      dateIndicator.style.display = "flex";
+      const timeNote = timeVal ? ` (logged at ${timeVal})` : '';
+      indicatorText.textContent = (displayStr || dateIso) + timeNote;
+      submitBtn.textContent = noteVal ? "Update " + dateIso : "Save for " + dateIso;
+      noteInput.placeholder = noteVal ? "Update note for " + dateIso : "What was good on " + dateIso + "?";
+      deleteBtn.style.display = noteVal ? "inline-block" : "none";
+    }
+
+    logSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    noteInput.focus();
+  }
+
+  // Handle grid clicks
+  habitGrid.addEventListener("click", (e) => {
+    const dot = e.target.closest("i");
+    if (!dot || dot.dataset.future === "1") return;
+    selectDate(dot.dataset.date, dot.dataset.display, dot.dataset.note, false, dot.dataset.time);
+  });
+
+  // Reset to today
+  resetTodayBtn.addEventListener("click", () => {
+    selectDate(TODAY, "Today", TODAY_NOTE, false, TODAY_TIME);
+  });
+
+  // Handle delete
+  deleteBtn.addEventListener("click", () => {
+    const curDate = entryDateInput.value;
+    if (confirm(`Are you sure you want to delete the entry for ${curDate}?`)) {
+      deleteDateInput.value = curDate;
+      deleteForm.submit();
+    }
+  });
+
+  // Surprise Me Memory Flashback
+  const surpriseBtn = document.getElementById("surpriseBtn");
+  const memoryBox = document.getElementById("memoryBox");
+  const memoryDate = document.getElementById("memoryDate");
+  const memoryText = document.getElementById("memoryText");
+  const anotherMemoryBtn = document.getElementById("anotherMemoryBtn");
+
+  async function fetchRandomMemory() {
+    try {
+      surpriseBtn.disabled = true;
+      surpriseBtn.textContent = "Fetching memory...";
+      const res = await fetch("{{ url_for('random_entry') }}");
+      const data = await res.json();
+      if (data.found) {
+        memoryDate.textContent = data.date;
+        memoryText.textContent = `"${data.note}"`;
+        memoryBox.style.display = "block";
+        surpriseBtn.textContent = "✨ Surprise Me Again";
+      } else {
+        alert("No entries found yet! Log a few good things first.");
+        surpriseBtn.textContent = "✨ Surprise Me with a Past Memory";
+      }
+    } catch (err) {
+      console.error(err);
+      surpriseBtn.textContent = "✨ Surprise Me with a Past Memory";
+    } finally {
+      surpriseBtn.disabled = false;
+    }
+  }
+
+  surpriseBtn.addEventListener("click", fetchRandomMemory);
+  anotherMemoryBtn.addEventListener("click", fetchRandomMemory);
+
+  // Confetti celebrations
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("saved") === "1" && typeof confetti === "function") {
+    confetti({
+      particleCount: 85,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#2f8f57', '#f4b73a', '#14302a', '#e6f1ea']
+    });
+    urlParams.delete("saved");
+    const cleanUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
+  // Click badge to celebrate
+  document.querySelectorAll(".badges li.got").forEach(badge => {
+    badge.addEventListener("click", (e) => {
+      if (typeof confetti !== "function") return;
+      const rect = badge.getBoundingClientRect();
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight
+        },
+        colors: ['#f4b73a', '#2f8f57', '#eef2ee']
+      });
+    });
+  });
+})();
+</script>
+</body></html>
