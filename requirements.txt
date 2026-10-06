@@ -1,2 +1,4 @@
 Flask>=3.0
-mysql-connector-python>=8.4
+gunicorn>=21.2
+PyMySQL>=1.1
+cryptography>=42.0
